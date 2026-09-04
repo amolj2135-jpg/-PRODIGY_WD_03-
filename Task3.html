@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>NEURAL TTT</title>
+
+<style>
+
+@import url(
+'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap'
+);
+
+*{
+box-sizing:border-box;
+}
+
+body{
+
+margin:0;
+
+min-height:100vh;
+
+display:grid;
+
+place-items:center;
+
+padding:20px;
+
+font-family:
+"Space Grotesk",
+sans-serif;
+
+background:#050711;
+
+color:white;
+
+}
+
+.app{
+
+width:
+min(1000px,100%);
+
+display:grid;
+
+grid-template-columns:
+1.1fr .9fr;
+
+gap:20px;
+
+}
+
+
+/* BOARD */
+
+.board-area{
+
+padding:30px;
+
+border-radius:30px;
+
+background:#0b0f18;
+
+border:
+1px solid #252d40;
+
+box-shadow:
+0 30px 100px rgba(0,0,0,.5);
+
+}
+
+.header{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:25px;
+
+}
+
+.header h1{
+
+font-size:22px;
+
+margin:0;
+
+}
+
+.badge{
+
+font-size:10px;
+
+color:#8fa7ff;
+
+border:
+1px solid #313b59;
+
+padding:8px 12px;
+
+border-radius:30px;
+
+}
+
+
+/* BOARD */
+
+.board{
+
+display:grid;
+
+grid-template-columns:
+repeat(3,1fr);
+
+gap:12px;
+
+max-width:560px;
+
+margin:auto;
+
+aspect-ratio:1;
+
+}
+
+.cell{
+
+border:
+1px solid #29334a;
+
+border-radius:22px;
+
+background:
+linear-gradient(
+145deg,
+#111726,
+#090d15
+);
+
+color:white;
+
+font-size:
+clamp(55px,10vw,100px);
+
+font-weight:700;
+
+cursor:pointer;
+
+transition:.2s;
+
+}
+
+.cell:hover:not(.taken){
+
+transform:scale(.97);
+
+border-color:#8da8ff;
+
+}
+
+.cell.x{
+
+color:#91aaff;
+
+text-shadow:
+0 0 30px #607fff;
+
+}
+
+.cell.o{
+
+color:#ff91c8;
+
+text-shadow:
+0 0 30px #ff5fae;
+
+}
+
+.cell.win{
+
+animation:
+winner .7s infinite alternate;
+
+}
+
+@keyframes winner{
+
+from{
+transform:scale(1);
+}
+
+to{
+transform:scale(.94);
+box-shadow:
+0 0 40px rgba(255,255,255,.25);
+}
+
+}
+
+
+/* SIDE */
+
+.side{
+
+padding:25px;
+
+border-radius:30px;
+
+background:#0b0f18;
+
+border:
+1px solid #252d40;
+
+display:flex;
+
+flex-direction:column;
+
+gap:15px;
+
+}
+
+.status{
+
+font-size:28px;
+
+font-weight:700;
+
+}
+
+.subtitle{
+
+font-size:13px;
+
+color:#77849e;
+
+line-height:1.6;
+
+}
+
+
+/* SCORE */
+
+.panel{
+
+padding:18px;
+
+border:
+1px solid #222a3d;
+
+border-radius:20px;
+
+background:#0e131e;
+
+}
+
+.panel h3{
+
+font-size:11px;
+
+letter-spacing:2px;
+
+color:#7d8ba8;
+
+margin-top:0;
+
+}
+
+.score{
+
+display:grid;
+
+grid-template-columns:
+repeat(3,1fr);
+
+gap:8px;
+
+}
+
+.score-box{
+
+background:#141a27;
+
+border-radius:13px;
+
+padding:15px;
+
+text-align:center;
+
+}
+
+.score-box strong{
+
+display:block;
+
+font-size:25px;
+
+}
+
+.score-box span{
+
+font-size:9px;
+
+color:#72809b;
+
+}
+
+
+/* SELECT */
+
+select{
+
+width:100%;
+
+padding:13px;
+
+border-radius:12px;
+
+background:#111725;
+
+border:
+1px solid #30394e;
+
+color:white;
+
+}
+
+
+/* BUTTON */
+
+.action{
+
+width:100%;
+
+padding:13px;
+
+margin-top:10px;
+
+border-radius:12px;
+
+border:
+1px solid #30394e;
+
+background:#121827;
+
+color:white;
+
+cursor:pointer;
+
+}
+
+.action:hover{
+
+background:#1b2438;
+
+}
+
+
+/* AI LOG */
+
+.log{
+
+max-height:170px;
+
+overflow:auto;
+
+font-size:11px;
+
+line-height:1.9;
+
+color:#77849f;
+
+}
+
+.thinking{
+
+color:#8fa7ff;
+
+}
+
+
+/* MOBILE */
+
+@media(max-width:800px){
+
+.app{
+
+grid-template-columns:1fr;
+
+}
+
+.board-area,
+.side{
+
+padding:20px;
+
+}
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+<!-- BOARD -->
+
+<section class="board-area">
+
+<div class="header">
+
+<h1>
+NEURAL // TTT
+</h1>
+
+<div class="badge">
+HUMAN VS AI
+</div>
+
+</div>
+
+
+<div
+class="board"
+id="board">
+</div>
+
+</section>
+
+
+<!-- SIDE PANEL -->
+
+<aside class="side">
+
+
+<div>
+
+<div
+class="status"
+id="status">
+
+Your Move
+
+</div>
+
+<p
+class="subtitle"
+id="subtitle">
+
+You are X.
+The AI is O.
+
+</p>
+
+</div>
+
+
+<!-- SCORE -->
+
+<div class="panel">
+
+<h3>
+MATCH SCORE
+</h3>
+
+<div class="score">
+
+<div class="score-box">
+
+<strong id="you">
+0
+</strong>
+
+<span>
+YOU
+</span>
+
+</div>
+
+
+<div class="score-box">
+
+<strong id="draw">
+0
+</strong>
+
+<span>
+DRAW
+</span>
+
+</div>
+
+
+<div class="score-box">
+
+<strong id="ai">
+0
+</strong>
+
+<span>
+AI
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- AI -->
+
+<div class="panel">
+
+<h3>
+AI MODE
+</h3>
+
+<select id="difficulty">
+
+<option value="easy">
+Easy
+</option>
+
+<option value="smart"
+selected>
+Smart — Minimax
+</option>
+
+<option value="adaptive">
+Adaptive AI
+</option>
+
+</select>
+
+
+<button
+class="action"
+onclick="newGame()">
+
+NEW GAME
+
+</button>
+
+</div>
+
+
+<!-- LOG -->
+
+<div class="panel">
+
+<h3>
+AI DECISION LOG
+</h3>
+
+<div
+class="log"
+id="log">
+
+Waiting for the first move...
+
+</div>
+
+</div>
+
+
+</aside>
+
+</div>
+
+
+<script>
+
+
+let board=
+Array(9).fill("");
+
+let gameOver=false;
+
+let thinking=false;
+
+let score={
+you:0,
+draw:0,
+ai:0
+};
+
+const wins=[
+
+[0,1,2],
+
+[3,4,5],
+
+[6,7,8],
+
+[0,3,6],
+
+[1,4,7],
+
+[2,5,8],
+
+[0,4,8],
+
+[2,4,6]
+
+];
+
+
+const $=
+id =>
+document.getElementById(id);
+
+
+/* RENDER */
+
+function render(){
+
+$("board").innerHTML=
+
+board.map(
+(value,index)=>`
+
+<button
+class="cell
+${value.toLowerCase()}
+${value ? "taken":""}"
+onclick="humanMove(${index})">
+
+${value}
+
+</button>
+
+`).join("");
+
+}
+
+
+/* CHECK WINNER */
+
+function checkWinner(state=board){
+
+for(
+let combo of wins
+){
+
+let [a,b,c]=combo;
+
+if(
+state[a] &&
+state[a]===state[b] &&
+state[a]===state[c]
+){
+
+return {
+
+player:state[a],
+
+line:combo
+
+};
+
+}
+
+}
+
+if(
+state.every(Boolean)
+){
+
+return {
+player:"DRAW",
+line:[]
+};
+
+}
+
+return null;
+
+}
+
+
+/* HUMAN */
+
+function humanMove(index){
+
+if(
+gameOver ||
+thinking ||
+board[index]
+){
+
+return;
+
+}
+
+board[index]="X";
+
+render();
+
+let result=
+checkWinner();
+
+if(result){
+
+finish(result);
+
+return;
+
+}
+
+thinking=true;
+
+$("status").textContent=
+"AI Thinking...";
+
+$("subtitle").classList.add(
+"thinking"
+);
+
+setTimeout(
+aiMove,
+450
+);
+
+}
+
+
+/* AI */
+
+function aiMove(){
+
+let difficulty=
+$("difficulty").value;
+
+let move;
+
+if(
+difficulty==="easy"
+){
+
+move=randomMove();
+
+}
+
+else{
+
+move=bestMove();
+
+}
+
+board[move]="O";
+
+thinking=false;
+
+render();
+
+let result=
+checkWinner();
+
+if(result){
+
+finish(result);
+
+return;
+
+}
+
+$("status").textContent=
+"Your Move";
+
+$("subtitle").classList.remove(
+"thinking"
+);
+
+$("subtitle").textContent=
+"The AI is waiting for your next move.";
+
+}
+
+
+/* RANDOM */
+
+function randomMove(){
+
+let empty=[];
+
+board.forEach(
+(value,index)=>{
+
+if(!value)
+empty.push(index);
+
+});
+
+return empty[
+Math.floor(
+Math.random()*empty.length
+)
+];
+
+}
+
+
+/* BEST MOVE */
+
+function bestMove(){
+
+let bestScore=-Infinity;
+
+let move=0;
+
+for(
+let i=0;
+i<9;
+i++
+){
+
+if(!board[i]){
+
+board[i]="O";
+
+let score=
+minimax(
+board,
+false,
+0
+);
+
+board[i]="";
+
+if(score>bestScore){
+
+bestScore=score;
+
+move=i;
+
+}
+
+}
+
+}
+
+addLog(
+"AI evaluated board → cell "
++
+(move+1)
++
+" | score "
++
+bestScore
+);
+
+return move;
+
+}
+
+
+/* MINIMAX */
+
+function minimax(
+state,
+maximizing,
+depth
+){
+
+let result=
+checkWinner(state);
+
+if(result){
+
+if(
+result.player==="O"
+)
+return 10-depth;
+
+if(
+result.player==="X"
+)
+return depth-10;
+
+return 0;
+
+}
+
+
+if(maximizing){
+
+let best=-Infinity;
+
+for(
+let i=0;
+i<9;
+i++
+){
+
+if(!state[i]){
+
+state[i]="O";
+
+best=Math.max(
+best,
+minimax(
+state,
+false,
+depth+1
+)
+);
+
+state[i]="";
+
+}
+
+}
+
+return best;
+
+}
+
+else{
+
+let best=Infinity;
+
+for(
+let i=0;
+i<9;
+i++
+){
+
+if(!state[i]){
+
+state[i]="X";
+
+best=Math.min(
+best,
+minimax(
+state,
+true,
+depth+1
+)
+);
+
+state[i]="";
+
+}
+
+}
+
+return best;
+
+}
+
+}
+
+
+/* FINISH */
+
+function finish(result){
+
+gameOver=true;
+
+if(
+result.player==="DRAW"
+){
+
+score.draw++;
+
+$("status").textContent=
+"Draw!";
+
+$("subtitle").textContent=
+"Neither side could break the defence.";
+
+}
+
+else if(
+result.player==="X"
+){
+
+score.you++;
+
+$("status").textContent=
+"You Won!";
+
+$("subtitle").textContent=
+"You defeated the AI.";
+
+}
+
+else{
+
+score.ai++;
+
+$("status").textContent=
+"AI Wins!";
+
+$("subtitle").textContent=
+"The model found the winning path.";
+
+}
+
+
+$("you").textContent=
+score.you;
+
+$("draw").textContent=
+score.draw;
+
+$("ai").textContent=
+score.ai;
+
+
+result.line.forEach(
+index=>{
+
+$("board")
+.children[index]
+.classList.add("win");
+
+});
+
+}
+
+
+/* LOG */
+
+function addLog(message){
+
+$("log").innerHTML +=
+`<div>${message}</div>`;
+
+$("log").scrollTop=
+$("log").scrollHeight;
+
+}
+
+
+/* NEW GAME */
+
+function newGame(){
+
+board=
+Array(9).fill("");
+
+gameOver=false;
+
+thinking=false;
+
+$("status").textContent=
+"Your Move";
+
+$("subtitle").textContent=
+"You are X. The AI is O.";
+
+$("subtitle").classList.remove(
+"thinking"
+);
+
+$("log").innerHTML=
+"New neural session started.";
+
+render();
+
+}
+
+
+/* START */
+
+render();
+
+</script>
+
+</body>
+
+</html>
